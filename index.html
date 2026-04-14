@@ -404,7 +404,6 @@ p { font-size: 13px; line-height: 1.6; margin: 6px 0; color: var(--fg); }
     <div class="nav-section-label">Solutions</div>
     <a class="nav-link" href="#sol-a"><span class="nav-icon">A</span> New Standalone Sport</a>
     <a class="nav-link recommended" href="#sol-b"><span class="nav-icon">B</span> Sub-Sport of Basketball ✓</a>
-    <a class="nav-link" href="#sol-c"><span class="nav-icon">C</span> Manual MVP</a>
   </div>
   <div class="nav-section">
     <div class="nav-section-label">Decision</div>
@@ -673,7 +672,7 @@ p { font-size: 13px; line-height: 1.6; margin: 6px 0; color: var(--fg); }
       <!-- DEV ROADMAP -->
       <div class="section" id="roadmap">
         <div class="section-title"><span class="icon">&#128506;&#65039;</span> Dev Roadmap</div>
-        <div class="tldr yellow"><span class="tldr-key">TL;DR</span> Start Manual MVP (0 dev). On deal signature, build BIG3 sub-sport in 3–5 sprints using FIBA 3x3 as the template.</div>
+        <div class="tldr green"><span class="tldr-key">TL;DR</span> Validate commercial signal, then build BIG3 as Sub-Sport of Basketball in 3–5 sprints using FIBA 3x3 as the direct template.</div>
 
         <div class="card gray">
           <div class="card-title">Phase 0 — Validate Commercial Signal (Now, 0 sprints)</div>
@@ -685,16 +684,13 @@ p { font-size: 13px; line-height: 1.6; margin: 6px 0; color: var(--fg); }
         </div>
 
         <div class="card green">
-          <div class="card-title">Phase 1 — Manual MVP (On deal intent, 0 dev)</div>
+          <div class="card-title">Phase 1 — Sub-Sport Build (On deal signature, 3–5 sprints)</div>
           <ul>
-            <li>Onboard BIG3 under existing Basketball (SystemTypeId: 1) — <strong>all actions already match</strong></li>
-            <li>Operators tag: 4-pointer, Dunk, Block, Steal, Game End (to 50) manually</li>
-            <li>Client UX is excellent even in manual phase — action names are correct</li>
+            <li>Build BIG3 as Sub-Sport of Basketball (SystemTypeId: 1) using FIBA 3x3 (System 731) as template</li>
+            <li>Override: game-to-50 scoring, 4-point line geometry, Takeover / Bring It In rules</li>
+            <li>~44 of 48 Basketball actions reused directly — minimal new action work</li>
+            <li>Full automation from Day 1 — no manual ops phase needed</li>
           </ul>
-          <table style="margin-top:10px">
-            <tr><th>Events/week</th><th>Operator hours/game</th><th>Weekly cost</th><th>Monthly cost</th></tr>
-            <tr><td>4–6 games</td><td>1.5–2 hrs</td><td><span class="money">~$60–$120</span></td><td><span class="money">~$240–$480</span></td></tr>
-          </table>
         </div>
 
         <div class="card blue">
@@ -784,21 +780,6 @@ p { font-size: 13px; line-height: 1.6; margin: 6px 0; color: var(--fg); }
 
       <hr>
 
-      <!-- SOLUTION C -->
-      <div class="section" id="sol-c">
-        <div class="section-title"><span style="color:var(--fg-muted);font-weight:700">C</span> Manual MVP</div>
-        <div class="tldr gray"><span class="tldr-key">TL;DR</span> Onboard BIG3 under existing Basketball. Zero dev. Client UX is excellent because Basketball actions already map. Right call for Phase 1.</div>
-
-        <div class="card gray">
-          <p>Unlike sport fishing, BIG3 manual clips tagged under Basketball will be <strong>nearly perfectly labeled</strong> — 4-pointer already exists, all basketball actions map directly. Operators can deliver great content from Day 1 with no new tooling.</p>
-          <div class="callout tip" style="margin-top:10px">
-            The Manual MVP for BIG3 is significantly better quality than for most sports because the parent sport (Basketball) already has all the right action names.
-          </div>
-        </div>
-      </div>
-
-      <hr>
-
       <!-- HISTORICAL EVIDENCE -->
       <div class="section" id="historical">
         <div class="section-title"><span class="icon">&#128200;</span> Historical Evidence &amp; Baselines</div>
@@ -815,8 +796,7 @@ p { font-size: 13px; line-height: 1.6; margin: 6px 0; color: var(--fg); }
           <div class="callout note" style="margin-top:10px">
             <strong>Applied to BIG3:</strong><br>
             Sub-sport path: <span class="money">3–5 weeks neto = 1.5–2.5 months calendar</span><br>
-            New standalone (overkill): <span class="money">6–8 weeks neto = 3–5 months calendar</span><br>
-            Manual MVP: <span class="money">$0 dev / ~$240–480/month ops</span>
+            New standalone (overkill): <span class="money">6–8 weeks neto = 3–5 months calendar</span>
           </div>
         </div>
 
@@ -836,24 +816,23 @@ p { font-size: 13px; line-height: 1.6; margin: 6px 0; color: var(--fg); }
       <!-- COMPARISON TABLE -->
       <div class="section" id="comparison">
         <div class="section-title"><span class="icon">&#9878;&#65039;</span> Solution Comparison</div>
-        <div class="tldr green"><span class="tldr-key">TL;DR</span> Solution B (Sub-Sport) wins clearly. 4-pointer exists, FIBA 3x3 is the template, effort is half of standalone. Manual MVP is Phase 1.</div>
+        <div class="tldr green"><span class="tldr-key">TL;DR</span> Solution B (Sub-Sport) wins clearly. 4-pointer exists, FIBA 3x3 is the direct template, effort is half of standalone. Build on deal signature.</div>
 
         <div class="card">
           <table>
-            <tr><th>Dimension</th><th>A: New Standalone</th><th>B: Sub-Sport &#9989;</th><th>C: Manual MVP</th></tr>
-            <tr><td>Dev Effort</td><td>6–10 sprints</td><td><strong>3–5 sprints</strong></td><td>0 sprints</td></tr>
-            <tr><td>Time to Market</td><td>3–5 months</td><td><strong>1.5–2.5 months</strong></td><td>Immediate</td></tr>
-            <tr><td>4-pointer Action</td><td>Build from scratch</td><td><span class="label label-purple">Already exists (Id: 107863)</span></td><td>Works (manually)</td></tr>
-            <tr><td>FIBA 3x3 Precedent</td><td>Ignored</td><td><span class="label label-green">Direct template</span></td><td>N/A</td></tr>
-            <tr><td>Actions Reused</td><td>0</td><td><strong>~44 of 48</strong></td><td>All (manual)</td></tr>
-            <tr><td>Risk if No Deal</td><td class="con">HIGH</td><td class="pro">LOW</td><td class="pro">None</td></tr>
-            <tr><td>Client UX</td><td>Full BIG3-specific</td><td><strong>Full BIG3-specific</strong></td><td>Excellent (correct action names)</td></tr>
+            <tr><th>Dimension</th><th>A: New Standalone</th><th>B: Sub-Sport &#9989;</th></tr>
+            <tr><td>Dev Effort</td><td>6–10 sprints</td><td><strong>3–5 sprints</strong></td></tr>
+            <tr><td>Time to Market</td><td>3–5 months</td><td><strong>1.5–2.5 months</strong></td></tr>
+            <tr><td>4-pointer Action</td><td>Build from scratch</td><td><span class="label label-purple">Already exists (Id: 107863)</span></td></tr>
+            <tr><td>FIBA 3x3 Precedent</td><td>Ignored</td><td><span class="label label-green">Direct template</span></td></tr>
+            <tr><td>Actions Reused</td><td>0</td><td><strong>~44 of 48</strong></td></tr>
+            <tr><td>Risk if No Deal</td><td class="con">HIGH</td><td class="pro">LOW</td></tr>
+            <tr><td>Client UX</td><td>Full BIG3-specific</td><td><strong>Full BIG3-specific</strong></td></tr>
           </table>
           <table style="margin-top:12px">
             <tr><th>Solution</th><th>Engineering Cost</th><th>Pipeline Confirmed?</th><th>Verdict</th></tr>
             <tr><td>A: New Standalone</td><td><span class="money">~$90–150K (6–10 sprints)</span></td><td>No</td><td><span class="label label-red">Overkill</span></td></tr>
-            <tr><td><strong>B: Sub-Sport</strong></td><td><span class="money">~$45–75K (3–5 sprints)</span></td><td>TBD</td><td><span class="label label-green">Recommended post-deal</span></td></tr>
-            <tr><td>C: Manual MVP</td><td><span class="money">$0 dev / ~$6K/yr ops</span></td><td>TBD</td><td><span class="label label-green">Start here</span></td></tr>
+            <tr><td><strong>B: Sub-Sport</strong></td><td><span class="money">~$45–75K (3–5 sprints)</span></td><td>TBD</td><td><span class="label label-green">Recommended on deal signature</span></td></tr>
           </table>
         </div>
       </div>
@@ -865,11 +844,11 @@ p { font-size: 13px; line-height: 1.6; margin: 6px 0; color: var(--fg); }
         <div class="section-title"><span class="icon">&#127919;</span> Recommendation</div>
 
         <div class="verdict-box">
-          <h3>Recommended Path: C &rarr; B (Sub-Sport of Basketball)</h3>
+          <h3>Recommended Path: B — Sub-Sport of Basketball</h3>
           <ol>
             <li><strong>Now:</strong> Confirm BIG3 commercial signal with AM team. Who owns this relationship at WSC?</li>
-            <li><strong>On deal intent:</strong> Onboard BIG3 under existing Basketball (Id:1). Operators clip 4-pointers, Dunks, Game End (to 50). Zero dev. Immediate revenue. Client UX is excellent.</li>
-            <li><strong>On signed deal:</strong> Build BIG3 as Sub-Sport of Basketball using FIBA 3x3 (System 731) as the template. 3–5 sprints. Full automation path unlocked.</li>
+            <li><strong>On deal signature:</strong> Build BIG3 as Sub-Sport of Basketball using FIBA 3x3 (System 731) as the template. 3–5 sprints. Full automation from Day 1.</li>
+            <li><strong>Post-launch:</strong> Monitor Takeover / Bring It In usage. Add BIG3-specific complex actions if client requests deeper highlight specificity.</li>
           </ol>
         </div>
 
@@ -885,13 +864,13 @@ p { font-size: 13px; line-height: 1.6; margin: 6px 0; color: var(--fg); }
         </div>
 
         <div class="card" style="margin-top:12px">
-          <div class="card-title">Graduation Triggers: Manual &rarr; Sub-Sport Build</div>
+          <div class="card-title">Build Triggers</div>
           <table>
             <tr><th>#</th><th>Trigger</th></tr>
             <tr><td>1</td><td>BIG3 deal signed with minimum 12-month term</td></tr>
             <tr><td>2</td><td>BIG3 confirms scoring data source (API or feed)</td></tr>
-            <tr><td>3</td><td>Manual ops exceeds 15 hrs/week (automation ROI positive)</td></tr>
-            <tr><td>4</td><td>Client explicitly requests BIG3-specific labels (Takeover, Bring It In)</td></tr>
+            <tr><td>3</td><td>PM ownership aligned: Manor (commercial) + Yoav Yahav (Basketball sport model)</td></tr>
+            <tr><td>4</td><td>FIBA 3x3 (System 731) config reviewed and confirmed as template</td></tr>
           </table>
         </div>
 
