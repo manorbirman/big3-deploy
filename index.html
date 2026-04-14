@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en" data-color-mode="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIG3 Basketball — WSC Platform Analysis</title>
+<style>
+/* ── GitHub design tokens ── */
+:root {
+  --fg:          #1f2328;
+  --fg-muted:    #636c76;
+  --fg-subtle:   #6e7781;
+  --canvas:      #ffffff;
+  --canvas-sub:  #f6f8fa;
+  --border:      #d0d7de;
+  --border-muted:#d8dee4;
+  --accent:      #0969da;
+  --success:     #1a7f37;
+  --success-bg:  #dafbe1;
+  --danger:      #d1242f;
+  --danger-bg:   #ffebe9;
+  --attention:   #9a6700;
+  --attention-bg:#fff8c5;
+  --done:        #8250df;
+  --done-bg:     #fbefff;
+  --header-h:    48px;
+  --sidebar-w:   260px;
+  --content-w:   880px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--canvas-sub);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TOP HEADER ── */
+.gh-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: #24292f;
+  border-bottom: 1px solid #444c56;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  z-index: 200;
+}
+.gh-logo { color: #fff; font-size: 18px; line-height: 1; }
+.gh-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #e6edf3;
+  font-weight: 500;
+}
+.gh-breadcrumb a { color: #e6edf3; text-decoration: none; opacity: .75; }
+.gh-breadcrumb a:hover { opacity: 1; text-decoration: underline; }
+.gh-breadcrumb .sep { opacity: .4; }
+.gh-badge-green {
+  margin-left: auto;
+  background: #238636;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 2em;
+  border: 1px solid rgba(255,255,255,.2);
+}
+.gh-badge-purple {
+  margin-left: auto;
+  background: #6e40c9;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 2em;
+  border: 1px solid rgba(255,255,255,.2);
+}
+
+/* ── LAYOUT ── */
+.layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  width: var(--sidebar-w);
+  height: calc(100vh - var(--header-h));
+  background: var(--canvas);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0 24px;
+  z-index: 100;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.nav-section { padding: 0 0 8px; }
+.nav-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 12px 16px 4px;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 16px;
+  font-size: 13px;
+  color: var(--fg-muted);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background .1s, color .1s, border-color .1s;
+}
+.nav-link:hover { background: var(--canvas-sub); color: var(--fg); }
+.nav-link.active { color: var(--fg); border-left-color: var(--accent); background: var(--canvas-sub); font-weight: 600; }
+.nav-link.recommended { color: var(--success) !important; font-weight: 600; }
+.nav-icon { width: 16px; text-align: center; font-size: 13px; opacity: .7; }
+
+/* ── MAIN ── */
+.main { margin-left: var(--sidebar-w); flex: 1; }
+
+/* ── REPO HERO ── */
+.repo-hero {
+  background: var(--canvas);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 32px 20px;
+}
+.repo-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.repo-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+.repo-title .highlight { color: var(--success); }
+.repo-desc {
+  font-size: 14px;
+  color: var(--fg-muted);
+  line-height: 1.5;
+  max-width: 680px;
+  margin-bottom: 16px;
+}
+.stat-row { display: flex; gap: 24px; flex-wrap: wrap; }
+.stat-item { display: flex; align-items: baseline; gap: 6px; }
+.stat-value { font-size: 20px; font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; }
+.stat-label { font-size: 12px; color: var(--fg-muted); }
+
+/* ── CONTENT ── */
+.content { padding: 24px 32px 48px; max-width: var(--content-w); }
+.section { margin-bottom: 32px; }
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title .icon { font-size: 15px; }
+
+/* ── TLDR ── */
+.tldr {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.tldr-key { font-weight: 700; flex-shrink: 0; }
+.tldr.blue   { background: #ddf4ff; border-color: #54aeff66; color: #0550ae; }
+.tldr.green  { background: var(--success-bg); border-color: #2da44e66; color: #1a7f37; }
+.tldr.yellow { background: var(--attention-bg); border-color: #d4a72c66; color: #7d4e00; }
+.tldr.red    { background: var(--danger-bg); border-color: #ff818266; color: #82071e; }
+.tldr.gray   { background: var(--canvas-sub); border-color: var(--border); color: var(--fg-muted); }
+.tldr.purple { background: var(--done-bg); border-color: #d2a8ff66; color: #5b2c8b; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card.green  { border-left: 3px solid var(--success); }
+.card.red    { border-left: 3px solid var(--danger); }
+.card.blue   { border-left: 3px solid var(--accent); }
+.card.yellow { border-left: 3px solid #d4a72c; }
+.card.purple { border-left: 3px solid var(--done); }
+.card.gray   { border-left: 3px solid var(--border); }
+.card-title  { font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 10px; }
+
+/* ── LABELS ── */
+.label {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 2em;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  border: 1px solid transparent;
+}
+.label-green  { background: #dafbe1; color: #116329; border-color: #2da44e33; }
+.label-blue   { background: #ddf4ff; color: #0550ae; border-color: #54aeff33; }
+.label-red    { background: #ffebe9; color: #82071e; border-color: #ff818233; }
+.label-yellow { background: #fff8c5; color: #7d4e00; border-color: #d4a72c33; }
+.label-purple { background: #fbefff; color: #5b2c8b; border-color: #d2a8ff33; }
+.label-gray   { background: var(--canvas-sub); color: var(--fg-muted); border-color: var(--border); }
+.label-orange { background: #fff1e5; color: #953800; border-color: #fb8f4433; }
+
+/* ── TABLES ── */
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+th {
+  background: var(--canvas-sub);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--fg-muted);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+tr:nth-child(even) td { background: var(--canvas-sub); }
+.pro { color: var(--success); font-weight: 600; }
+.con { color: var(--danger); font-weight: 600; }
+
+/* ── GRID ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── CALLOUTS ── */
+.callout {
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 10px 0;
+}
+.callout.note   { background: #ddf4ff; border-color: #54aeff66; color: #0550ae; }
+.callout.warn   { background: var(--attention-bg); border-color: #d4a72c66; color: #7d4e00; }
+.callout.tip    { background: var(--success-bg); border-color: #2da44e66; color: #1a7f37; }
+.callout.danger { background: var(--danger-bg); border-color: #ff818266; color: #82071e; }
+.callout.purple { background: var(--done-bg); border-color: #d2a8ff66; color: #5b2c8b; }
+.callout-title  { font-weight: 700; margin-bottom: 4px; }
+
+/* ── CODE / MONEY ── */
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  background: var(--canvas-sub);
+  border: 1px solid var(--border-muted);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--fg);
+}
+.money {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  background: #fff8c5;
+  border: 1px solid #d4a72c55;
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: #7d4e00;
+  font-weight: 700;
+}
+
+/* ── ACTION TAGS ── */
+.action-reuse  { display:inline-block; background:#dafbe1; color:#116329; border:1px solid #2da44e33; border-radius:3px; padding:1px 7px; font-size:11px; font-weight:700; margin:2px; }
+.action-exists { display:inline-block; background:var(--done-bg); color:#5b2c8b; border:1px solid #d2a8ff33; border-radius:3px; padding:1px 7px; font-size:11px; font-weight:700; margin:2px; }
+.action-new    { display:inline-block; background:#fff8c5; color:#7d4e00; border:1px solid #d4a72c33; border-radius:3px; padding:1px 7px; font-size:11px; font-weight:700; margin:2px; }
+.action-override{ display:inline-block; background:#ffebe9; color:#82071e; border:1px solid #ff818233; border-radius:3px; padding:1px 7px; font-size:11px; font-weight:700; margin:2px; }
+
+/* ── VERDICT BOX ── */
+.verdict-box {
+  background: var(--success-bg);
+  border: 1px solid #2da44e66;
+  border-radius: 6px;
+  padding: 16px 20px;
+}
+.verdict-box h3 { color: #1a7f37; font-size: 15px; margin-bottom: 10px; }
+.verdict-box ol { padding-left: 20px; }
+.verdict-box li { margin: 6px 0; font-size: 13px; color: var(--fg); }
+
+/* ── DIVIDER ── */
+hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+/* ── FOOTER ── */
+.site-footer {
+  margin-left: var(--sidebar-w);
+  background: var(--canvas);
+  border-top: 1px solid var(--border);
+  padding: 20px 32px;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+/* ── SCROLL TOP ── */
+.scroll-top {
+  position: fixed; bottom: 20px; right: 20px;
+  width: 36px; height: 36px;
+  background: var(--canvas); border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; font-size: 16px; color: var(--fg-muted);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  opacity: 0; transition: opacity .2s;
+  z-index: 50;
+}
+.scroll-top.visible { opacity: 1; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .site-footer { margin-left: 0; }
+  .repo-hero { padding: 16px; }
+  .content { padding: 16px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .stat-row { gap: 16px; }
+}
+
+ul, ol { padding-left: 20px; }
+li { margin: 4px 0; font-size: 13px; color: var(--fg); }
+h3 { font-size: 15px; font-weight: 600; margin: 16px 0 8px; color: var(--fg); }
+h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--fg-muted); margin: 14px 0 6px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+p { font-size: 13px; line-height: 1.6; margin: 6px 0; color: var(--fg); }
+
+/* highlight row for key finding */
+.key-row td { background: var(--done-bg) !important; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header class="gh-header">
+  <div class="gh-logo">&#9670;</div>
+  <nav class="gh-breadcrumb">
+    <a href="#">wsc-sports</a>
+    <span class="sep">/</span>
+    <a href="#">sport-analysis</a>
+    <span class="sep">/</span>
+    <strong>big3-analysis.md</strong>
+  </nav>
+  <span class="gh-badge-purple">Sub-Sport of Basketball</span>
+</header>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="nav-section">
+    <div class="nav-section-label">Context</div>
+    <a class="nav-link" href="#context"><span class="nav-icon">&#128202;</span> Business Signals</a>
+    <a class="nav-link" href="#jira"><span class="nav-icon">&#127915;</span> Jira Landscape</a>
+    <a class="nav-link" href="#providers"><span class="nav-icon">&#128225;</span> Data Providers</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">BIG3 Deep-Dive</div>
+    <a class="nav-link" href="#fundamentals"><span class="nav-icon">&#127936;</span> Sport Fundamentals</a>
+    <a class="nav-link" href="#rules"><span class="nav-icon">&#128221;</span> BIG3 Unique Rules</a>
+    <a class="nav-link" href="#actions"><span class="nav-icon">&#127919;</span> Actions &amp; Highlights</a>
+    <a class="nav-link" href="#broadcast"><span class="nav-icon">&#127916;</span> Broadcast Use Cases</a>
+    <a class="nav-link" href="#roadmap"><span class="nav-icon">&#128506;&#65039;</span> Dev Roadmap</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">Solutions</div>
+    <a class="nav-link" href="#sol-a"><span class="nav-icon">A</span> New Standalone Sport</a>
+    <a class="nav-link recommended" href="#sol-b"><span class="nav-icon">B</span> Sub-Sport of Basketball ✓</a>
+    <a class="nav-link" href="#sol-c"><span class="nav-icon">C</span> Manual MVP</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">Decision</div>
+    <a class="nav-link" href="#historical"><span class="nav-icon">&#128200;</span> Historical Evidence</a>
+    <a class="nav-link" href="#comparison"><span class="nav-icon">&#9878;&#65039;</span> Comparison</a>
+    <a class="nav-link" href="#recommendation"><span class="nav-icon">&#127919;</span> Recommendation</a>
+    <a class="nav-link" href="#references"><span class="nav-icon">&#128206;</span> Sources</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="layout">
+  <div class="main">
+
+    <!-- REPO HERO -->
+    <div class="repo-hero">
+      <div class="repo-meta">
+        <span>Manor Birman, PM</span>
+        <span>&#183;</span>
+        <span>April 2026</span>
+        <span>&#183;</span>
+        <span class="label label-yellow">&#9711; Prospecting</span>
+        <span class="label label-purple">Sub-Sport of Basketball</span>
+        <span class="label label-green">4-pointer already exists</span>
+      </div>
+      <div class="repo-title">&#127936; BIG3 &mdash; <span class="highlight">Sub-Sport of Basketball or New Sport?</span></div>
+      <div class="repo-desc">BIG3 is a professional 3-on-3 basketball league (Season 9) with 8 US teams, founded by Ice Cube. WSC already has operational Basketball (Id: 1) with 48 actions &mdash; including a 4-pointer (Id: 107863). FIBA 3x3 is already live as a Basketball sub-system. The sub-sport path is strongly validated.</div>
+      <div class="stat-row">
+        <div class="stat-item">
+          <span class="stat-value">TBD</span>
+          <span class="stat-label">Active Pipeline</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">3</span>
+          <span class="stat-label">Solutions Analyzed</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">0</span>
+          <span class="stat-label">Signed Clients</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">C&rarr;B</span>
+          <span class="stat-label">Recommended Path</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">44/48</span>
+          <span class="stat-label">Actions Reusable</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- BUSINESS SIGNALS -->
+      <div class="section" id="context">
+        <div class="section-title"><span class="icon">&#128202;</span> Business Signals</div>
+        <div class="tldr yellow"><span class="tldr-key">TL;DR</span> One identified client (BIG3). No signed deal. Season 9 active, ~8% audience growth, US broadcast history (NBC/CBS). Strong entertainment-sport brand with star power (retired NBA players, Ice Cube).</div>
+
+        <div class="card yellow">
+          <div class="card-title">Identified Client: BIG3 League</div>
+          <table>
+            <tr><th>Client</th><th>URL</th><th>Format</th><th>Stage</th><th>Notes</th></tr>
+            <tr>
+              <td><strong>BIG3</strong></td>
+              <td><a href="https://big3.com" target="_blank">big3.com</a></td>
+              <td>3-on-3 league, 8 teams, Season 9</td>
+              <td><span class="label label-yellow">Prospecting</span></td>
+              <td>No Salesforce entry. No AM/DM owner confirmed.</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Market Context</div>
+          <table>
+            <tr><th>Signal</th><th>Detail</th><th>Relevance to WSC</th></tr>
+            <tr><td>League scale</td><td>8 teams, touring US cities, Season 9 (2026)</td><td>~9 weekly events per season, consistent content volume</td></tr>
+            <tr><td>Broadcast history</td><td>NBC / CBS (historical); BIG3 streaming platform</td><td>Video asset demand is real and established</td></tr>
+            <tr><td>Audience growth</td><td>~8% audience gain (BIG3 internal, 2026)</td><td>Growing, not declining — good timing</td></tr>
+            <tr><td>Star power</td><td>Dwight Howard, Joe Johnson, Corey Brewer; Ice Cube co-founder</td><td>Player highlight demand is strong (recognizable NBA names)</td></tr>
+            <tr><td>Format innovation</td><td>4-point line, first-to-50, unique rules</td><td>Novel highlight moments differentiate from standard NBA content</td></tr>
+            <tr><td>3x3 precedent</td><td>FIBA 3x3 already live at WSC as Basketball sub-system (TAM-12604)</td><td>Direct architectural template exists</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- JIRA LANDSCAPE -->
+      <div class="section" id="jira">
+        <div class="section-title"><span class="icon">&#127915;</span> Jira Landscape</div>
+        <div class="tldr blue"><span class="tldr-key">TL;DR</span> No BIG3-specific tickets. However, FIBA 3x3 is an active Basketball sub-system — TAM-12604 (P1, To Do, April 2026) confirms 3-on-3 basketball is already handled as a Basketball sub-sport in production.</div>
+
+        <div class="card">
+          <table>
+            <tr><th>Ticket</th><th>Summary</th><th>Status</th><th>Priority</th><th>Relevance</th></tr>
+            <tr>
+              <td><code>TAM-12604</code></td>
+              <td>Basketball | FIBA 3X3 (731) - Missing configuration for new season</td>
+              <td><span class="label label-blue">To Do</span></td>
+              <td>P1</td>
+              <td>&#9989; Directly relevant — FIBA 3x3 is a live Basketball sub-system</td>
+            </tr>
+          </table>
+          <div class="callout tip" style="margin-top:10px">
+            <div class="callout-title">&#128161; Critical Finding</div>
+            FIBA 3x3 already operates as a sub-system within WSC Basketball (SystemTypeId: 1). TAM-12604 is a live P1 ticket for the 2026 season configuration. The sub-sport model for 3-on-3 basketball is <strong>already established and in production</strong>. BIG3 follows the exact same pattern.
+          </div>
+          <p style="margin-top:8px;color:var(--fg-muted)">No BIG3-specific epic or commercial ticket found. Fresh commercial initiative, but technically it sits on proven ground.</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- DATA PROVIDERS -->
+      <div class="section" id="providers">
+        <div class="section-title"><span class="icon">&#128225;</span> Data Providers</div>
+        <div class="tldr yellow"><span class="tldr-key">TL;DR</span> No confirmed BIG3 PBP data provider. BIG3 likely has internal stats tracking. Standard basketball providers (Sportradar, Stats Perform) do not cover BIG3 specifically.</div>
+
+        <div class="card">
+          <table>
+            <tr><th>Provider</th><th>Covers BIG3?</th><th>PBP Quality</th><th>Notes</th></tr>
+            <tr><td>BIG3 internal stats</td><td><span class="label label-yellow">Likely yes</span></td><td>Score/stat-level</td><td>Requires custom integration; confirm with BIG3</td></tr>
+            <tr><td>Sportradar</td><td><span class="label label-red">Not confirmed</span></td><td>N/A</td><td>Sportradar covers FIBA 3x3, not BIG3</td></tr>
+            <tr><td>Stats Perform / Opta</td><td><span class="label label-red">Not confirmed</span></td><td>N/A</td><td>No known BIG3 coverage</td></tr>
+            <tr><td>FIBA 3x3 data</td><td>Different org</td><td>Sportradar feed exists</td><td>Same sport model — not applicable to BIG3 directly</td></tr>
+          </table>
+          <p style="margin-top:8px;color:var(--fg-muted)">Confirm with BIG3 what data they can export. A real-time scoring API would enable Score Update automation. Full shot-level PBP would enable higher automation but may not exist.</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- SPORT FUNDAMENTALS -->
+      <div class="section" id="fundamentals">
+        <div class="section-title"><span class="icon">&#127936;</span> Sport Fundamentals</div>
+        <div class="tldr purple"><span class="tldr-key">TL;DR</span> 3-on-3 basketball, game to 50 points, 4-point line replaces 3-pointer. 8 teams, ~9 weekly events. WSC Basketball (Id:1) covers 4/5 compatibility dimensions. Sub-sport is the clear path.</div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Format</div>
+            <ul>
+              <li><strong>League:</strong> BIG3 — 8 US teams, Season 9 (2026)</li>
+              <li><strong>Format:</strong> 3-on-3 basketball</li>
+              <li><strong>Win condition:</strong> First team to 50 points</li>
+              <li><strong>Scoring:</strong> 1-pt (inside arc), 2-pt (outside arc), 4-pt (BIG3 line)</li>
+              <li><strong>Events:</strong> ~9 weekly tour stops across US cities</li>
+              <li><strong>Playoffs:</strong> Championship game at end of season</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">WSC Basketball Compatibility</div>
+            <table style="margin-top:0">
+              <tr><th>Dimension</th><th>Result</th></tr>
+              <tr><td>Scoring model</td><td><span class="label label-green">Pass</span> ~90% overlap</td></tr>
+              <tr><td>Game progress</td><td><span class="label label-green">Pass</span> One level different</td></tr>
+              <tr><td>Action parameters</td><td><span class="label label-green">Pass</span> &gt;90% reuse</td></tr>
+              <tr><td>Team format</td><td><span class="label label-green">Pass</span> Team vs Team</td></tr>
+              <tr><td>Data feeds</td><td><span class="label label-yellow">Partial</span> Same model, different source</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">&#9989; Sub-sport verdict: 4.5/5 dimensions pass</div>
+          BIG3 is overwhelmingly compatible with WSC Basketball. The recommended path is Solution B: Sub-Sport of Basketball, following the same model already used for FIBA 3x3 (TAM-12604).
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- BIG3 UNIQUE RULES -->
+      <div class="section" id="rules">
+        <div class="section-title"><span class="icon">&#128221;</span> BIG3 Rule Differences vs Standard Basketball</div>
+        <div class="tldr yellow"><span class="tldr-key">TL;DR</span> 4-point line, game-to-50, no standard free throws, Takeover rule. These are rule <em>overrides</em>, not structural differences. All manageable within the Basketball sub-sport model.</div>
+
+        <div class="card">
+          <table>
+            <tr><th>Rule</th><th>Standard Basketball</th><th>BIG3</th><th>WSC Impact</th></tr>
+            <tr><td><strong>Shot types</strong></td><td>2-pointer, 3-pointer, FT</td><td>1-pt, 2-pt (outer arc), 4-pt (BIG3 line)</td><td><span class="label label-purple">4-pointer already exists (Id: 107863)</span></td></tr>
+            <tr><td><strong>Game end</strong></td><td>End of 4 quarters (time)</td><td>First to 50 points (score)</td><td>Game End fires on score=50; resolver override</td></tr>
+            <tr><td><strong>Fouls</strong></td><td>Fouled player shoots FT</td><td>Fouled player checks ball ("Bring It In")</td><td>Add "Bring It In" parameter on Foul action</td></tr>
+            <tr><td><strong>Takeover</strong></td><td>No equivalent</td><td>Leading scorer gets Takeover status</td><td>New lightweight action or parameter</td></tr>
+            <tr><td><strong>Team size</strong></td><td>5v5</td><td>3v3</td><td>No WSC model impact (player count not enforced)</td></tr>
+            <tr><td><strong>Period structure</strong></td><td>4 quarters</td><td>1 period (game to 50)</td><td>Override to single-period; Quarter Start/End unused</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- ACTIONS & HIGHLIGHTS -->
+      <div class="section" id="actions">
+        <div class="section-title"><span class="icon">&#127919;</span> Actions &amp; Highlights</div>
+        <div class="tldr purple"><span class="tldr-key">TL;DR</span> 90%+ of WSC Basketball actions are directly reusable. The <strong>4-pointer action already exists in WSC Basketball (Id: 107863)</strong> — BIG3's most distinctive shot is already in the model. Only 1–2 items need to be added.</div>
+
+        <div class="card">
+          <div class="card-title">Action Reuse Map</div>
+          <table>
+            <tr><th>WSC Basketball Action</th><th>Id</th><th>BIG3 Equivalent</th><th>Status</th></tr>
+            <tr><td>2-pointer</td><td>101</td><td>2-point shot (outer arc)</td><td><span class="action-reuse">Direct reuse</span></td></tr>
+            <tr><td>3-pointer</td><td>102</td><td>&#8212; (no 3-pt line)</td><td><span class="action-override">Override / disable</span></td></tr>
+            <tr class="key-row"><td><strong>4-pointer</strong></td><td><strong>107863</strong></td><td><strong>4-point shot (BIG3 line)</strong></td><td><span class="action-exists">&#9733; Already exists!</span></td></tr>
+            <tr><td>Dunk</td><td>103</td><td>Dunk</td><td><span class="action-reuse">Direct reuse</span></td></tr>
+            <tr><td>FT-Made</td><td>104</td><td>Check-ball equivalent</td><td><span class="action-override">Override behavior</span></td></tr>
+            <tr><td>Block</td><td>110</td><td>Block</td><td><span class="action-reuse">Direct reuse</span></td></tr>
+            <tr><td>Steal</td><td>108</td><td>Steal</td><td><span class="action-reuse">Direct reuse</span></td></tr>
+            <tr><td>Assist</td><td>107</td><td>Assist</td><td><span class="action-reuse">Direct reuse</span></td></tr>
+            <tr><td>Rebound</td><td>112</td><td>Rebound</td><td><span class="action-reuse">Direct reuse</span></td></tr>
+            <tr><td>Foul</td><td>111</td><td>Foul (add Bring It In param)</td><td><span class="action-reuse">Reuse + new param</span></td></tr>
+            <tr><td>Turnover</td><td>109</td><td>Turnover</td><td><span class="action-reuse">Direct reuse</span></td></tr>
+            <tr><td>Game Start / End</td><td>119/120</td><td>Game Start / End (score=50)</td><td><span class="action-reuse">Reuse + override trigger</span></td></tr>
+            <tr><td>Replay</td><td>150</td><td>Replay</td><td><span class="action-reuse">Direct reuse</span></td></tr>
+            <tr><td>Interview / Press Conference</td><td>130/136</td><td>Same</td><td><span class="action-reuse">Direct reuse</span></td></tr>
+            <tr><td><strong>Takeover</strong></td><td>&#8212;</td><td>Takeover designation moment</td><td><span class="action-new">New (1 action)</span></td></tr>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">New / Modified Parameters for BIG3</div>
+          <table>
+            <tr><th>Action</th><th>Parameter</th><th>Values</th></tr>
+            <tr><td>Foul</td><td>Result</td><td>Check Ball (Bring It In), Free Throw</td></tr>
+            <tr><td>All scoring actions</td><td>Takeover</td><td>Yes / No</td></tr>
+            <tr><td>Game End</td><td>Winning Score</td><td>50</td></tr>
+          </table>
+          <div class="callout purple" style="margin-top:10px">
+            <div class="callout-title">&#9733; Key finding</div>
+            The <strong>4-pointer action (Id: 107863) already exists</strong> in WSC Basketball. This is BIG3's most distinctive shot and it's already in our model. Combined with FIBA 3x3 as a live template, this is the strongest sub-sport case we've seen.
+          </div>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- BROADCAST USE CASES -->
+      <div class="section" id="broadcast">
+        <div class="section-title"><span class="icon">&#127916;</span> Broadcast Use Cases</div>
+        <div class="tldr blue"><span class="tldr-key">TL;DR</span> Rich content surface. 4-pointer moments, game-winning baskets to 50, Takeover designations, and player highlights are all natural WSC clip formats. Audience is young, urban, digital-first, NBA-adjacent.</div>
+
+        <div class="card">
+          <ul>
+            <li><strong>4-Point Moment</strong> — BIG3's signature shot; instant social clip</li>
+            <li><strong>Game-Winner to 50</strong> — final basket ending the game; maximum drama</li>
+            <li><strong>Takeover Designation</strong> — when a player earns Takeover status; celebrity moment</li>
+            <li><strong>Player Highlight Reel</strong> — per-player weekly highlights (retired NBA stars with high brand recognition)</li>
+            <li><strong>Dunk / Block Reaction</strong> — small court = closer camera proximity, better angles</li>
+            <li><strong>Team Weekly Highlights</strong> — per-game recap per team</li>
+            <li><strong>Ice Cube / Celebrity Moments</strong> — courtside owner reactions, social-first content</li>
+            <li><strong>Season Standings</strong> — standings-change clip as teams rotate weekly</li>
+            <li><strong>Championship Recap</strong> — end-of-season final highlights</li>
+          </ul>
+          <h4 style="margin-top:12px">Audience Profile</h4>
+          <table>
+            <tr><th>Dimension</th><th>Profile</th></tr>
+            <tr><td>Demographics</td><td>Urban, 18–40, NBA-adjacent fan base</td></tr>
+            <tr><td>Platform</td><td>Streaming + social first; TV (NBC/CBS historically)</td></tr>
+            <tr><td>Engagement</td><td>Star player following + team loyalty; Ice Cube brand amplification</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- DEV ROADMAP -->
+      <div class="section" id="roadmap">
+        <div class="section-title"><span class="icon">&#128506;&#65039;</span> Dev Roadmap</div>
+        <div class="tldr yellow"><span class="tldr-key">TL;DR</span> Start Manual MVP (0 dev). On deal signature, build BIG3 sub-sport in 3–5 sprints using FIBA 3x3 as the template.</div>
+
+        <div class="card gray">
+          <div class="card-title">Phase 0 — Validate Commercial Signal (Now, 0 sprints)</div>
+          <ul>
+            <li>Confirm BIG3 is a real pipeline opportunity — find AM/DM owner at WSC</li>
+            <li>Understand BIG3 content needs: events/week, clip volume, player highlight demand</li>
+            <li>Ask BIG3 about data capabilities (scoring API, PBP feed)</li>
+          </ul>
+        </div>
+
+        <div class="card green">
+          <div class="card-title">Phase 1 — Manual MVP (On deal intent, 0 dev)</div>
+          <ul>
+            <li>Onboard BIG3 under existing Basketball (SystemTypeId: 1) — <strong>all actions already match</strong></li>
+            <li>Operators tag: 4-pointer, Dunk, Block, Steal, Game End (to 50) manually</li>
+            <li>Client UX is excellent even in manual phase — action names are correct</li>
+          </ul>
+          <table style="margin-top:10px">
+            <tr><th>Events/week</th><th>Operator hours/game</th><th>Weekly cost</th><th>Monthly cost</th></tr>
+            <tr><td>4–6 games</td><td>1.5–2 hrs</td><td><span class="money">~$60–$120</span></td><td><span class="money">~$240–$480</span></td></tr>
+          </table>
+        </div>
+
+        <div class="card blue">
+          <div class="card-title">Phase 2 — BIG3 Sub-Sport Build (On signed deal)</div>
+          <ul>
+            <li>Create BIG3 as a SubSport under Basketball (SystemTypeId: 1)</li>
+            <li>Override: single-period game to 50, FT behavior, 3pt relabeled as 2pt</li>
+            <li>Add Takeover action/parameter; Bring It In parameter on Foul</li>
+            <li>Template: FIBA 3x3 sub-system (System 731) — already live</li>
+            <li>Estimated: <span class="money">3–5 sprints / 1.5–2.5 months calendar</span> per Shahar Cohen baseline</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- SOLUTION A -->
+      <div class="section" id="sol-a">
+        <div class="section-title"><span style="color:var(--accent);font-weight:700">A</span> New Standalone Sport</div>
+        <div class="tldr blue"><span class="tldr-key">TL;DR</span> Overkill. Replicates all Basketball infra from scratch when the parent sport is already operational. Wastes 3–4 weeks neto vs the sub-sport path. Not recommended.</div>
+
+        <div class="card blue">
+          <div class="card-title">Why Not A</div>
+          <p>Would require a new SystemTypeId, new Resolver, and replication of all 48 Basketball actions. Unnecessary given Basketball (Id:1) is fully operational and FIBA 3x3 has already proven the sub-sport architecture.</p>
+          <table style="margin-top:10px">
+            <tr><th>Work Stream</th><th>People</th><th>Duration (neto)</th></tr>
+            <tr><td>Full sport model build</td><td>2 backend engineers</td><td>6–8 weeks neto</td></tr>
+            <tr><td><strong>Vs Sub-Sport (B)</strong></td><td>1–2 engineers</td><td><strong>3–5 weeks neto</strong></td></tr>
+          </table>
+          <div class="callout danger" style="margin-top:10px">New Standalone wastes ~3 weeks of engineering time compared to the sub-sport path, with no UX benefit for the client.</div>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- SOLUTION B -->
+      <div class="section" id="sol-b">
+        <div class="section-title"><span style="color:var(--success);font-weight:700">B</span> Sub-Sport of Basketball &mdash; &#9989; Recommended</div>
+        <div class="tldr green"><span class="tldr-key">TL;DR</span> 4-pointer exists, FIBA 3x3 is the template, 44 actions inherited. 3–5 sprints. This is the clear winner.</div>
+
+        <div class="card green">
+          <div class="card-title">Architecture Overview</div>
+          <table>
+            <tr><th>Component</th><th>Details</th></tr>
+            <tr><td>Parent SystemTypeId</td><td><code>1</code> (Basketball, IsOperational &#9989;)</td></tr>
+            <tr><td>SubSport Name</td><td><code>BIG3</code></td></tr>
+            <tr><td>Template</td><td>FIBA 3x3 (System 731) — already live in production</td></tr>
+            <tr><td>Actions Inherited</td><td>~44 of 48 Basketball actions</td></tr>
+            <tr><td>Actions Overridden</td><td>3-pointer (disabled), FT behavior, Game End condition</td></tr>
+            <tr><td>New Actions</td><td>1 — Takeover</td></tr>
+            <tr><td>New Parameters</td><td>2 — Bring It In on Foul; Takeover flag on scoring actions</td></tr>
+          </table>
+          <h4>Effort Estimate</h4>
+          <table>
+            <tr><th>Work Stream</th><th>People</th><th>Duration (neto)</th></tr>
+            <tr><td>SubSport config (override entities, parameters)</td><td>1 backend</td><td>1–2 weeks</td></tr>
+            <tr><td>Game progress override (single period to 50)</td><td>1 backend</td><td>1 week</td></tr>
+            <tr><td>Ingestion adapter (if BIG3 data available)</td><td>1 backend</td><td>1–2 weeks</td></tr>
+            <tr><td>QA + ops training</td><td>QA + ops</td><td>1 week</td></tr>
+            <tr><td><strong>Total</strong></td><td>1–2 engineers</td><td><span class="money">3–5 weeks neto / 1.5–2.5 months calendar</span></td></tr>
+          </table>
+        </div>
+
+        <div class="grid-2">
+          <div class="card green">
+            <div class="card-title">&#10003; Pros</div>
+            <ul>
+              <li class="pro">4-pointer (Id: 107863) already exists — core action ready</li>
+              <li class="pro">FIBA 3x3 (System 731) is the exact template</li>
+              <li class="pro">~44 actions inherited with zero new work</li>
+              <li class="pro">Saves ~3 weeks vs standalone build</li>
+              <li class="pro">Basketball PM (Yoav Yahav) already owns the parent infra</li>
+              <li class="pro">Client UX is full BIG3-specific post-build</li>
+            </ul>
+          </div>
+          <div class="card red">
+            <div class="card-title">&#10007; Cons</div>
+            <ul>
+              <li class="con">Shared with Basketball — rule overrides need careful config management</li>
+              <li class="con">No standard PBP provider for BIG3</li>
+              <li class="con">Game-to-50 logic requires resolver override</li>
+              <li class="con">PM ownership coordination with Yoav Yahav required</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- SOLUTION C -->
+      <div class="section" id="sol-c">
+        <div class="section-title"><span style="color:var(--fg-muted);font-weight:700">C</span> Manual MVP</div>
+        <div class="tldr gray"><span class="tldr-key">TL;DR</span> Onboard BIG3 under existing Basketball. Zero dev. Client UX is excellent because Basketball actions already map. Right call for Phase 1.</div>
+
+        <div class="card gray">
+          <p>Unlike sport fishing, BIG3 manual clips tagged under Basketball will be <strong>nearly perfectly labeled</strong> — 4-pointer already exists, all basketball actions map directly. Operators can deliver great content from Day 1 with no new tooling.</p>
+          <div class="callout tip" style="margin-top:10px">
+            The Manual MVP for BIG3 is significantly better quality than for most sports because the parent sport (Basketball) already has all the right action names.
+          </div>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- HISTORICAL EVIDENCE -->
+      <div class="section" id="historical">
+        <div class="section-title"><span class="icon">&#128200;</span> Historical Evidence &amp; Baselines</div>
+        <div class="tldr gray"><span class="tldr-key">TL;DR</span> Sub-sport saves ~3–4 weeks neto vs standalone. FIBA 3x3 is the exact precedent. Shahar Cohen: 3–4 weeks for a sub-sport (Badminton/Table Tennis baseline).</div>
+
+        <div class="card">
+          <table>
+            <tr><th>Source</th><th>Estimate</th><th>Context</th></tr>
+            <tr><td>Shahar Cohen (Nov 2023)</td><td><span class="money">6 weeks neto</span> new sport; <span class="money">+2 weeks</span> new data format</td><td>Full new sport. Sub-sport path is faster.</td></tr>
+            <tr><td>Dan Dragucki (Jan 2025)</td><td><span class="money">1.5–2 months</span> no ingestion; <span class="money">3 months</span> with ingestion</td><td>Medium-complexity new sport. Sub-sport is significantly cheaper.</td></tr>
+            <tr><td>Shahar Cohen (May 2023)</td><td><span class="money">3–4 weeks incl. testing</span> sub-sport</td><td>Badminton &amp; Table Tennis. <strong>Direct baseline for BIG3 sub-sport path.</strong></td></tr>
+            <tr><td>Manual clipping</td><td><span class="money">$10/hr</span>; 1.5–2 hrs/game</td><td>Basketball games are well-understood by WSC operators.</td></tr>
+          </table>
+          <div class="callout note" style="margin-top:10px">
+            <strong>Applied to BIG3:</strong><br>
+            Sub-sport path: <span class="money">3–5 weeks neto = 1.5–2.5 months calendar</span><br>
+            New standalone (overkill): <span class="money">6–8 weeks neto = 3–5 months calendar</span><br>
+            Manual MVP: <span class="money">$0 dev / ~$240–480/month ops</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Sub-Sport Precedents (Direct Comparisons)</div>
+          <table>
+            <tr><th>Sub-Sport</th><th>Parent</th><th>Status</th><th>Lesson for BIG3</th></tr>
+            <tr><td>NRL (Id: 10046)</td><td>Rugby (Id: 27)</td><td><span class="label label-green">Operational</span></td><td>Different ruleset same parent — overrides work cleanly</td></tr>
+            <tr><td>Sevens (Id: 10047)</td><td>Rugby (Id: 27)</td><td><span class="label label-green">Operational</span></td><td>Shorter format, same core — analogous to BIG3</td></tr>
+            <tr class="key-row"><td><strong>FIBA 3x3 (Sys 731)</strong></td><td><strong>Basketball (Id: 1)</strong></td><td><span class="label label-green">Operational</span></td><td><strong>Exact template — same parent, same format category</strong></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- COMPARISON TABLE -->
+      <div class="section" id="comparison">
+        <div class="section-title"><span class="icon">&#9878;&#65039;</span> Solution Comparison</div>
+        <div class="tldr green"><span class="tldr-key">TL;DR</span> Solution B (Sub-Sport) wins clearly. 4-pointer exists, FIBA 3x3 is the template, effort is half of standalone. Manual MVP is Phase 1.</div>
+
+        <div class="card">
+          <table>
+            <tr><th>Dimension</th><th>A: New Standalone</th><th>B: Sub-Sport &#9989;</th><th>C: Manual MVP</th></tr>
+            <tr><td>Dev Effort</td><td>6–10 sprints</td><td><strong>3–5 sprints</strong></td><td>0 sprints</td></tr>
+            <tr><td>Time to Market</td><td>3–5 months</td><td><strong>1.5–2.5 months</strong></td><td>Immediate</td></tr>
+            <tr><td>4-pointer Action</td><td>Build from scratch</td><td><span class="label label-purple">Already exists (Id: 107863)</span></td><td>Works (manually)</td></tr>
+            <tr><td>FIBA 3x3 Precedent</td><td>Ignored</td><td><span class="label label-green">Direct template</span></td><td>N/A</td></tr>
+            <tr><td>Actions Reused</td><td>0</td><td><strong>~44 of 48</strong></td><td>All (manual)</td></tr>
+            <tr><td>Risk if No Deal</td><td class="con">HIGH</td><td class="pro">LOW</td><td class="pro">None</td></tr>
+            <tr><td>Client UX</td><td>Full BIG3-specific</td><td><strong>Full BIG3-specific</strong></td><td>Excellent (correct action names)</td></tr>
+          </table>
+          <table style="margin-top:12px">
+            <tr><th>Solution</th><th>Engineering Cost</th><th>Pipeline Confirmed?</th><th>Verdict</th></tr>
+            <tr><td>A: New Standalone</td><td><span class="money">~$90–150K (6–10 sprints)</span></td><td>No</td><td><span class="label label-red">Overkill</span></td></tr>
+            <tr><td><strong>B: Sub-Sport</strong></td><td><span class="money">~$45–75K (3–5 sprints)</span></td><td>TBD</td><td><span class="label label-green">Recommended post-deal</span></td></tr>
+            <tr><td>C: Manual MVP</td><td><span class="money">$0 dev / ~$6K/yr ops</span></td><td>TBD</td><td><span class="label label-green">Start here</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- RECOMMENDATION -->
+      <div class="section" id="recommendation">
+        <div class="section-title"><span class="icon">&#127919;</span> Recommendation</div>
+
+        <div class="verdict-box">
+          <h3>Recommended Path: C &rarr; B (Sub-Sport of Basketball)</h3>
+          <ol>
+            <li><strong>Now:</strong> Confirm BIG3 commercial signal with AM team. Who owns this relationship at WSC?</li>
+            <li><strong>On deal intent:</strong> Onboard BIG3 under existing Basketball (Id:1). Operators clip 4-pointers, Dunks, Game End (to 50). Zero dev. Immediate revenue. Client UX is excellent.</li>
+            <li><strong>On signed deal:</strong> Build BIG3 as Sub-Sport of Basketball using FIBA 3x3 (System 731) as the template. 3–5 sprints. Full automation path unlocked.</li>
+          </ol>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="card-title">Pre-Conditions Before Any Build</div>
+          <table>
+            <tr><th>Pre-Condition</th><th>Owner</th><th>Status</th></tr>
+            <tr><td>Confirm BIG3 is an active pipeline opportunity</td><td>AM team</td><td><span class="label label-yellow">Pending</span></td></tr>
+            <tr><td>Clarify PM ownership: Manor vs Yoav Yahav (Basketball PM)</td><td>Manor + Yoav</td><td><span class="label label-yellow">Pending</span></td></tr>
+            <tr><td>Confirm BIG3 data capabilities (scoring API?)</td><td>Technical PM</td><td><span class="label label-yellow">Pending</span></td></tr>
+            <tr><td>Review FIBA 3x3 (System 731) config as template</td><td>Engineering + PM</td><td><span class="label label-blue">Ready to do</span></td></tr>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="card-title">Graduation Triggers: Manual &rarr; Sub-Sport Build</div>
+          <table>
+            <tr><th>#</th><th>Trigger</th></tr>
+            <tr><td>1</td><td>BIG3 deal signed with minimum 12-month term</td></tr>
+            <tr><td>2</td><td>BIG3 confirms scoring data source (API or feed)</td></tr>
+            <tr><td>3</td><td>Manual ops exceeds 15 hrs/week (automation ROI positive)</td></tr>
+            <tr><td>4</td><td>Client explicitly requests BIG3-specific labels (Takeover, Bring It In)</td></tr>
+          </table>
+        </div>
+
+        <div class="callout warn" style="margin-top:12px">
+          <div class="callout-title">&#9888;&#65039; PM Coordination Required</div>
+          Basketball (SystemTypeId: 1) is owned by <strong>Yoav Yahav</strong>. Any sub-sport addition under Basketball requires alignment with Yoav. Clarify: does Manor own BIG3 commercially while Yoav owns the technical sport model? Align before sprint work starts.
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- REFERENCES -->
+      <div class="section" id="references">
+        <div class="section-title"><span class="icon">&#128206;</span> All Sources</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">Internal</div>
+            <ul>
+              <li>WSC DB <code>dbo.SystemTypes</code> — Basketball confirmed Id:1, IsOperational &#9989;</li>
+              <li>WSC DB <code>dbo.Actions</code> — 48 Basketball actions; 4-pointer (Id: 107863) confirmed</li>
+              <li>Jira TAM-12604 — FIBA 3x3 (System 731), P1, To Do, Apr 10 2026</li>
+              <li>Shahar Cohen estimates (Nov 2023, May 2023)</li>
+              <li>Dan Dragucki estimates (Jan 2025)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">External</div>
+            <ul>
+              <li><a href="https://big3.com" target="_blank">big3.com</a> — BIG3 official site, Season 9</li>
+              <li>BIG3 audience growth: ~8% gain (2026 internal data)</li>
+              <li>BIG3 broadcast: NBC, CBS historical; BIG3 streaming platform</li>
+              <li>BIG3 rules: 4-point line, game to 50, Bring It In, Takeover</li>
+            </ul>
+          </div>
+        </div>
+        <p style="margin-top:12px;color:var(--fg-muted)">Analysis prepared by Manor Birman, PM · April 2026 · Classification: Sub-Sport of Basketball · Template: FIBA 3x3 (System 731) · PM coordination: Yoav Yahav</p>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<footer class="site-footer">
+  &#127936; BIG3 Basketball Analysis &mdash; WSC Sports Platform &bull; Manor Birman, PM &bull; April 2026 &bull;
+  Sub-Sport of Basketball (SystemTypeId: 1) &bull; 4-pointer action already exists (Id: 107863) &bull; FIBA 3x3 is the template
+</footer>
+
+<button class="scroll-top" id="scrollTop">&#8679;</button>
+
+<script>
+const scrollBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => {
+  if (scrollBtn) scrollBtn.classList.toggle('visible', window.scrollY > 300);
+});
+if (scrollBtn) scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+const sections = document.querySelectorAll('.section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => { if (!l.classList.contains('recommended') || !e.target.id) l.classList.remove('active'); });
+      const active = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0% -75% 0%' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
